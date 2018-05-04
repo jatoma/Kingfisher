@@ -93,6 +93,12 @@ open class ImageDownloader {
     /// `authenticationChallengeResponder` will be used instead.
     open var trustedHosts: Set<String>?
     
+    ///An operation queue for scheduling the session delegate calls
+    open var sessionDelegateQueue: OperationQueue? = .main
+    
+    ///Determines whether callbacks should be dispatched on separate queue
+    open var dispatchOnCallbackQueue = true
+    
     /// Use this to set supply a configuration for the downloader. By default,
     /// NSURLSessionConfiguration.ephemeralSessionConfiguration() will be used.
     ///
@@ -101,7 +107,7 @@ open class ImageDownloader {
     open var sessionConfiguration = URLSessionConfiguration.ephemeral {
         didSet {
             session.invalidateAndCancel()
-            session = URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: nil)
+            session = URLSession(configuration: sessionConfiguration, delegate: sessionDelegate, delegateQueue: sessionDelegateQueue)
         }
     }
     
@@ -116,8 +122,8 @@ open class ImageDownloader {
     open weak var authenticationChallengeResponder: AuthenticationChallengeResponsable?
 
     private let name: String
-    private let sessionDelegate: SessionDelegate
-    private var session: URLSession
+    internal var sessionDelegate: SessionDelegate
+    internal var session: URLSession
 
     // MARK: Initializers
 
@@ -136,7 +142,7 @@ open class ImageDownloader {
         session = URLSession(
             configuration: sessionConfiguration,
             delegate: sessionDelegate,
-            delegateQueue: nil)
+            delegateQueue: sessionDelegateQueue)
 
         authenticationChallengeResponder = self
         setupSessionHandler()
@@ -166,6 +172,17 @@ open class ImageDownloader {
             }
             return (self.delegate ?? self).imageDownloader(self, didDownload: task.mutableData, for: url)
         }
+        sessionDelegate.onDidDownloadBackgroundTaskData.delegate(on: self) { (self, task) in
+            guard let url = task.task.originalRequest?.url else {
+                return task.data
+            }
+            
+            return (self.delegate ?? self).imageDownloader(self, didDownload: task.data, for: url)
+        }
+    }
+    
+    func sessionTask(with request: URLRequest) -> URLSessionTask {
+        return session.dataTask(with: request)
     }
 
     @discardableResult
@@ -229,7 +246,7 @@ open class ImageDownloader {
         if let existingTask = sessionDelegate.task(for: url) {
             downloadTask = sessionDelegate.append(existingTask, url: url, callback: callback)
         } else {
-            let sessionDataTask = session.dataTask(with: request)
+            let sessionDataTask = self.sessionTask(with: request)
             sessionDataTask.priority = options.downloadPriority
             downloadTask = sessionDelegate.add(sessionDataTask, url: url, callback: callback)
         }

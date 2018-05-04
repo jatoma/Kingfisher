@@ -44,7 +44,7 @@ public class SessionDataTask {
 
     /// The underlying download task. It is only for debugging purpose when you encountered an error. You should not
     /// modify the content of this task or start it yourself.
-    public let task: URLSessionDataTask
+    public let task: URLSessionTask
     private var callbacksStore = [CancelToken: TaskCallback]()
 
     var callbacks: Dictionary<SessionDataTask.CancelToken, SessionDataTask.TaskCallback>.Values {
@@ -67,7 +67,7 @@ public class SessionDataTask {
         return !callbacks.isEmpty
     }
 
-    init(task: URLSessionDataTask) {
+    init(task: URLSessionTask) {
         self.task = task
         mutableData = Data()
     }

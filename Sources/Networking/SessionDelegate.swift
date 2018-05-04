@@ -48,12 +48,13 @@ class SessionDelegate: NSObject {
     let onValidStatusCode = Delegate<Int, Bool>()
     let onDownloadingFinished = Delegate<(URL, Result<URLResponse, KingfisherError>), Void>()
     let onDidDownloadData = Delegate<SessionDataTask, Data?>()
+    let onDidDownloadBackgroundTaskData = Delegate<TaskWrapper, Data?>()
 
     let onReceiveSessionChallenge = Delegate<SessionChallengeFunc, Void>()
     let onReceiveSessionTaskChallenge = Delegate<SessionTaskChallengeFunc, Void>()
 
     func add(
-        _ dataTask: URLSessionDataTask,
+        _ dataTask: URLSessionTask,
         url: URL,
         callback: SessionDataTask.TaskCallback) -> DownloadTask
     {
@@ -247,7 +248,7 @@ extension SessionDelegate: URLSessionDataDelegate {
             completionHandler: completionHandler)
     }
 
-    private func onCompleted(task: URLSessionTask, result: Result<(Data, URLResponse?), KingfisherError>) {
+     func onCompleted(task: URLSessionTask, result: Result<(Data, URLResponse?), KingfisherError>) {
         guard let sessionTask = self.task(for: task) else {
             return
         }
