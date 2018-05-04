@@ -318,6 +318,7 @@
 		D9638BA61C7DC71F0046523D /* ImagePrefetcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9638BA41C7DC71F0046523D /* ImagePrefetcherTests.swift */; };
 		D9638BA71C7DCF560046523D /* ImagePrefetcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9638BA41C7DC71F0046523D /* ImagePrefetcherTests.swift */; };
 		D9638BA81C7DCF570046523D /* ImagePrefetcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9638BA41C7DC71F0046523D /* ImagePrefetcherTests.swift */; };
+		E204CD90209C88E60032B70F /* ImageBackgroundDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = E204CD8F209C88E60032B70F /* ImageBackgroundDownloader.swift */; };
 		F72CE9CE1FCF17ED00CC522A /* ImageModifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F72CE9CD1FCF17ED00CC522A /* ImageModifierTests.swift */; };
 		F72CE9CF1FCF17ED00CC522A /* ImageModifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F72CE9CD1FCF17ED00CC522A /* ImageModifierTests.swift */; };
 		F72CE9D01FCF17ED00CC522A /* ImageModifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F72CE9CD1FCF17ED00CC522A /* ImageModifierTests.swift */; };
@@ -537,6 +538,7 @@
 		D9638B9F1C7DBA660046523D /* ImagePrefetcher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ImagePrefetcher.swift; path = Sources/ImagePrefetcher.swift; sourceTree = "<group>"; };
 		D9638BA41C7DC71F0046523D /* ImagePrefetcherTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImagePrefetcherTests.swift; sourceTree = "<group>"; };
 		DE80CB18FBC9F9F23DC1FDCF /* Pods-KingfisherTests-macOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-KingfisherTests-macOS.release.xcconfig"; path = "Pods/Target Support Files/Pods-KingfisherTests-macOS/Pods-KingfisherTests-macOS.release.xcconfig"; sourceTree = "<group>"; };
+		E204CD8F209C88E60032B70F /* ImageBackgroundDownloader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ImageBackgroundDownloader.swift; path = Sources/ImageBackgroundDownloader.swift; sourceTree = "<group>"; };
 		F72CE9CD1FCF17ED00CC522A /* ImageModifierTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageModifierTests.swift; sourceTree = "<group>"; };
 		F78F5EBC1FCDDE42001A9111 /* ImageModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ImageModifier.swift; path = Sources/ImageModifier.swift; sourceTree = "<group>"; };
 		FB402D0D1EDEAB7E002B62A1 /* FormatIndicatedCacheSerializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FormatIndicatedCacheSerializer.swift; path = Sources/FormatIndicatedCacheSerializer.swift; sourceTree = "<group>"; };
@@ -810,6 +812,7 @@
 		4BF39F3C1D796B950035ECC8 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				E204CD8F209C88E60032B70F /* ImageBackgroundDownloader.swift */,
 				D10945EA1C526B6C001408EB /* Image.swift */,
 				4B77423E1D87E08A0077024E /* Indicator.swift */,
 				D10945EB1C526B6C001408EB /* ImageCache.swift */,
@@ -1911,6 +1914,7 @@
 				D10945FA1C526B86001408EB /* ImageTransition.swift in Sources */,
 				D10945FB1C526B86001408EB /* ImageView+Kingfisher.swift in Sources */,
 				D10945FC1C526B86001408EB /* KingfisherManager.swift in Sources */,
+				E204CD90209C88E60032B70F /* ImageBackgroundDownloader.swift in Sources */,
 				D10945FD1C526B86001408EB /* KingfisherOptionsInfo.swift in Sources */,
 				D13EA67D205C189C004F625F /* Box.swift in Sources */,
 				D9638BA01C7DBA660046523D /* ImagePrefetcher.swift in Sources */,

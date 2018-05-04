@@ -38,7 +38,7 @@ public typealias ImageDownloaderCompletionHandler = ((_ image: Image?, _ error: 
 
 /// Download task.
 public struct RetrieveImageDownloadTask {
-    let internalTask: URLSessionDataTask
+    let internalTask: URLSessionTask
     
     /// Downloader by which this task is intialized.
     public private(set) weak var ownerDownloader: ImageDownloader?
@@ -231,20 +231,26 @@ open class ImageDownloader {
     /// If `authenticationChallengeResponder` is set, this property will be ignored and the implemention of `authenticationChallengeResponder` will be used instead.
     open var trustedHosts: Set<String>?
     
+    ///An operation queue for scheduling the session delegate calls
+    open var sessionDelegateQueue: OperationQueue? = .main
+    
+    ///Determines whether callbacks should be dispatched on separate queue
+    open var dispatchOnCallbackQueue = true
+    
     /// Use this to set supply a configuration for the downloader. By default, NSURLSessionConfiguration.ephemeralSessionConfiguration() will be used. 
     /// You could change the configuration before a downloaing task starts. A configuration without persistent storage for caches is requsted for downloader working correctly.
     open var sessionConfiguration = URLSessionConfiguration.ephemeral {
         didSet {
             session?.invalidateAndCancel()
-            session = URLSession(configuration: sessionConfiguration, delegate: sessionHandler, delegateQueue: OperationQueue.main)
+            session = URLSession(configuration: sessionConfiguration, delegate: sessionHandler, delegateQueue: sessionDelegateQueue)
         }
     }
     
     /// Whether the download requests should use pipeling or not. Default is false.
     open var requestsUsePipelining = false
     
-    fileprivate let sessionHandler: ImageDownloaderSessionHandler
-    fileprivate var session: URLSession?
+    internal var sessionHandler: ImageDownloaderSessionHandler = ImageDownloaderSessionHandler()
+    internal var session: URLSession?
     
     /// Delegate of this `ImageDownloader` object. See `ImageDownloaderDelegate` protocol for more.
     open weak var delegate: ImageDownloaderDelegate?
@@ -286,7 +292,7 @@ open class ImageDownloader {
 
         // Provide a default implement for challenge responder.
         authenticationChallengeResponder = sessionHandler
-        session = URLSession(configuration: sessionConfiguration, delegate: sessionHandler, delegateQueue: .main)
+        session = URLSession(configuration: sessionConfiguration, delegate: sessionHandler, delegateQueue: sessionDelegateQueue)
     }
     
     deinit {
@@ -297,6 +303,13 @@ open class ImageDownloader {
         var fetchLoad: ImageFetchLoad?
         barrierQueue.sync(flags: .barrier) { fetchLoad = fetchLoads[url] }
         return fetchLoad
+    }
+    
+    
+    func sessionTask(with request: URLRequest) -> URLSessionTask? {
+        guard let session = session else { return nil }
+
+        return session.dataTask(with: request)
     }
     
     /**
@@ -345,7 +358,7 @@ open class ImageDownloader {
         var downloadTask: RetrieveImageDownloadTask?
         setup(progressBlock: progressBlock, with: completionHandler, for: url, options: options) {(session, fetchLoad) -> Void in
             if fetchLoad.downloadTask == nil {
-                let dataTask = session.dataTask(with: request)
+                guard let dataTask = self.sessionTask(with: request) else { return }
                 
                 fetchLoad.downloadTask = RetrieveImageDownloadTask(internalTask: dataTask, ownerDownloader: self)
                 
@@ -450,7 +463,7 @@ extension ImageDownloader {
 /// If we use `ImageDownloader` as the session delegate, it will not be released.
 /// So we need an additional handler to break the retain cycle.
 // See https://github.com/onevcat/Kingfisher/issues/235
-final class ImageDownloaderSessionHandler: NSObject, URLSessionDataDelegate, AuthenticationChallengeResponsable {
+class ImageDownloaderSessionHandler: NSObject, URLSessionDataDelegate, AuthenticationChallengeResponsable {
     
     // The holder will keep downloader not released while a data task is being executed.
     // It will be set when the task started, and reset when the task finished.
@@ -612,11 +625,20 @@ final class ImageDownloaderSessionHandler: NSObject, URLSessionDataDelegate, Aut
 
                     if options.backgroundDecode {
                         let decodedImage = finalImage.kf.decoded
-                        callbackQueue.safeAsync { completionHandler?(decodedImage, nil, url, data) }
+                        if downloader.dispatchOnCallbackQueue {
+                            callbackQueue.safeAsync { completionHandler?(decodedImage, nil, url, data) }
+                        }else {
+                            completionHandler?(decodedImage, nil, url, data)
+                        }
                     } else {
-                        callbackQueue.safeAsync { completionHandler?(finalImage, nil, url, data) }
+                        
+                        if downloader.dispatchOnCallbackQueue {
+                            callbackQueue.safeAsync { completionHandler?(finalImage, nil, url, data) }
+                        }else{
+                            completionHandler?(finalImage, nil, url, data)
+                        }
                     }
-                    
+
                 } else {
                     if let res = task.response as? HTTPURLResponse , res.statusCode == 304 {
                         let notModified = NSError(domain: KingfisherErrorDomain, code: KingfisherError.notModified.rawValue, userInfo: nil)
